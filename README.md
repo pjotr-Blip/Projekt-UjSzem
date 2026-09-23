@@ -57,6 +57,7 @@
 * Név
 * Bemutatkozás
 * Publikált cikkek
+* 1 fiók szint
 
 ---
 
@@ -66,6 +67,7 @@
 * Követett szerkesztők
 * Preferenciák
 * Könyvjelzőzött cikkek
+* 0 fiók szint
 
 ---
 
@@ -97,6 +99,18 @@
 
 ---
 
+## 🛠️ Admin felület
+
+* 3 fiók szint
+* könnyen megérthető beállítások
+* védett
+
 ## 🛢 Adatbázis
 
 <img width="945" height="378" alt="image" src="https://github.com/user-attachments/assets/279a6d02-653a-425c-989c-55b8443fd0ec" />
+
+---
+
+* A cikkeket url-ként tárolnánk az adatbázisban amit az admin felületről tölt fel a szerkesztő majd javascriptel rakjuk az oldalra
+* gsap-et használnánk animációkhoz de ez meg nem biztos
+*
