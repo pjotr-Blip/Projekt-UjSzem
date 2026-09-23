@@ -1,17 +1,19 @@
 1. Felhasznalok (Tábla)
 Ez a tábla felel minden regisztrált fiókért. A korábbi külön "Szerkesztők" táblát érdemes ide beolvasztani egy szerepkör (role) mezővel, ami sokkal hatékonyabb adatbázis-kezelést tesz lehetővé.
 
-    id (Primary Key, bigint, auto-increment) – Egyedi azonosító.
+    id (Primary Key, bigint)
 
-    felh_nev (varchar) – A felhasználó vagy szerkesztő publikus neve.
+    email (varchar) – Ezzel lép be mindenki.
 
-    email (varchar) – E-mail cím (itt javítva bigint-ről karakteres típusra).
+    jelszo (varchar) – Titkosított jelszó.
 
-    felh_jelszo (varchar) – Titkosított (hash-elt) jelszó.
+    publikus_nev (varchar) – A cikkeknél megjelenő szerzői név.
 
-    szerepkor (varchar vagy enum) – Hatáskör meghatározása (pl. 'olvaso', 'szerkeszto', 'admin'). Ezzel kiváltható a különálló szerkesztői tábla.
+    profilkep_url (varchar, nullálható) – A profilkép elérési útja.
 
-    statusz (varchar vagy boolean) – Fiók állapota (pl. 'aktiv', 'felfuggesztett').
+    szerepkor (tinyint) – A megbeszélt 0 (olvasó), 1 (szerkesztő), 2 (admin).
+
+    statusz (tinyint vagy boolean) – Fiók állapota.
 
 2. Temak (Tábla)
 A kategóriák tárolása. A merev főtéma/altéma felbontás helyett ez a struktúra önmagára hivatkozik, így végtelen mélységű kategóriafát (pl. Sport -> Labdarúgás -> Nemzetközi) hozhatsz létre.
