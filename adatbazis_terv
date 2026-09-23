@@ -1,0 +1,82 @@
+1. Felhasznalok (Tábla)
+Ez a tábla felel minden regisztrált fiókért. A korábbi külön "Szerkesztők" táblát érdemes ide beolvasztani egy szerepkör (role) mezővel, ami sokkal hatékonyabb adatbázis-kezelést tesz lehetővé.
+
+    id (Primary Key, bigint, auto-increment) – Egyedi azonosító.
+
+    felh_nev (varchar) – A felhasználó vagy szerkesztő publikus neve.
+
+    email (varchar) – E-mail cím (itt javítva bigint-ről karakteres típusra).
+
+    felh_jelszo (varchar) – Titkosított (hash-elt) jelszó.
+
+    szerepkor (varchar vagy enum) – Hatáskör meghatározása (pl. 'olvaso', 'szerkeszto', 'admin'). Ezzel kiváltható a különálló szerkesztői tábla.
+
+    statusz (varchar vagy boolean) – Fiók állapota (pl. 'aktiv', 'felfuggesztett').
+
+2. Temak (Tábla)
+A kategóriák tárolása. A merev főtéma/altéma felbontás helyett ez a struktúra önmagára hivatkozik, így végtelen mélységű kategóriafát (pl. Sport -> Labdarúgás -> Nemzetközi) hozhatsz létre.
+
+    id (Primary Key, bigint, auto-increment) – Egyedi kategória azonosító.
+
+    nev (varchar) – A téma neve (pl. "Belföld", "Sport").
+
+    szulo_id (Foreign Key, bigint, nullálható) – Ha ez egy altéma, akkor ide egy másik téma id-ja kerül. Ha ez egy fő kategória, akkor az értéke NULL.
+
+3. Cikkek (Tábla)
+A hírportál gerince. Itt már szerepelnek a megjelenítéshez szükséges érdemi szöveges mezők is.
+
+    id (Primary Key, bigint, auto-increment) – A cikk egyedi azonosítója.
+
+    szerkeszto_id (Foreign Key, bigint) – Kapcsolat a Felhasznalok táblával (ki írta a cikket).
+
+    tema_id (Foreign Key, bigint) – Kapcsolat a Temak táblával (hova tartozik).
+
+    cim (varchar) – A cikk főcíme.
+
+    leiras (text vagy varchar) – Rövid, figyelemfelkeltő bevezető szöveg, ami a főoldalon a cikklistában jelenik meg.
+
+    tartalom (text vagy longtext) – A cikk teljes, formázott (pl. HTML) szövege.
+
+    boritokep_url (varchar, nullálható) – A cikkhez tartozó kiemelt kép elérési útja a szerveren.
+
+    publikalasi_ido (datetime) – Mikortól legyen látható a cikk az oldalon (lehetőséget ad időzített posztolásra).
+
+    letrehozva (datetime) – A rekord adatbázisba kerülésének pontos ideje (adminisztrációs célokra).
+
+    utoljara_modositva (datetime) – Az utolsó szerkesztés időpontja.
+
+
+Tökéletes, ez a szerkezet így már egy nagyon stabil és jól skálázható alapot ad. Egy Szoftverfejlesztő és -tesztelő technikus vizsgaremek dokumentációjában, illetve a projekt megvédésekor kiemelten fontos, hogy az entitások közötti relációk (kapcsolatok) és azok típusa (kardinalitás) is szakszerűen legyenek definiálva.
+
+A dokumentációhoz és az SQL táblák létrehozásához (a FOREIGN KEY megkötéseknél) a következőképpen érdemes leírni a kapcsolatokat:
+
+1. Felhasznalok (1) — (N) Cikkek
+
+    Kapcsolat típusa: Egy-a-többhöz (1:N)
+
+    Leírás: Egy felhasználó (szerző/szerkesztő) több cikket is írhat a portálra, de egy adott cikk (ebben a struktúrában) csak egyetlen konkrét szerzőhöz tartozik.
+
+    Megvalósítás: A Cikkek tábla szerkeszto_id mezője idegen kulcsként (Foreign Key) hivatkozik a Felhasznalok tábla id elsődleges kulcsára (Primary Key).
+
+    Gyakorlati viselkedés (ON DELETE): Érdemes átgondolni, mi történik, ha egy szerkesztőt törölnek a rendszerből. Javasolt a kényszerítést úgy beállítani, hogy a cikk ne törlődjön (nem akarunk tartalomvesztést), hanem a szerkeszto_id váljon NULL-lá (vagy maradjon meg a cikk egy inaktív, "Törölt felhasználó" státuszú fiókhoz rendelve).
+
+2. Temak (1) — (N) Cikkek
+
+    Kapcsolat típusa: Egy-a-többhöz (1:N)
+
+    Leírás: Egy témakörön (pl. Sport) belül számtalan cikk jelenhet meg, de egy cikk – a jelenlegi terv alapján – szigorúan csak egyetlen kategóriába sorolható be.
+
+    Megvalósítás: A Cikkek tábla tema_id mezője idegen kulcsként hivatkozik a Temak tábla id mezőjére.
+
+    Gyakorlati viselkedés (ON DELETE): Ha egy kategóriát törölnek, a benne lévő cikkeknél a tema_id átállítható egy alapértelmezett "Egyéb" kategóriára, vagy kaphatnak NULL értéket.
+
+3. Temak (1) — (N) Temak (Önmagára hivatkozó / Self-referencing kapcsolat)
+
+    Kapcsolat típusa: Egy-a-többhöz (1:N)
+
+    Leírás: Egy szülő kategóriának (pl. Sport) több alkategóriája is lehet (pl. Foci, Kézilabda), de egy alkategóriának csak egyetlen közvetlen szülője van.
+
+    Megvalósítás: A Temak táblán belül a szulo_id idegen kulcsként hivatkozik ugyanezen tábla saját id mezőjére.
+
+    Gyakorlati viselkedés (ON DELETE): Ha egy szülőkategóriát törölsz, a legjobb megközelítés (CASCADE helyett), ha az alatta lévő alkategóriák szulo_id-ja automatikusan NULL lesz, így azok egyszerűen "feljebb lépnek" fő kategóriává, és nem veszik el a rendszerből az egész ág.
+
