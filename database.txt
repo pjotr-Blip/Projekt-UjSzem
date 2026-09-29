@@ -1,0 +1,40 @@
+-- Témák
+CREATE TABLE Temak (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tema_nev VARCHAR(255) NOT NULL,
+    altema_nev VARCHAR(255)
+) ENGINE=InnoDB;
+
+-- Felhasználók
+CREATE TABLE Felhasznalok (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    felh_nev VARCHAR(100) NOT NULL,
+    felh_jelszo VARCHAR(255) NOT NULL
+) ENGINE=InnoDB;
+
+-- Szerkesztők
+CREATE TABLE Szerkesztok (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    felhasznaloid BIGINT NOT NULL,
+    szerk_nev VARCHAR(100) NOT NULL,
+    statusz VARCHAR(50),
+    CONSTRAINT fk_szerkesztok_felhasznalo
+        FOREIGN KEY (felhasznaloid) REFERENCES Felhasznalok(id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Cikkek
+CREATE TABLE Cikkek (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    szerkesztoid BIGINT NOT NULL,
+    temaid BIGINT NOT NULL,
+    cim VARCHAR(255) NOT NULL,
+    publikalasi_ido DATETIME,
+    CONSTRAINT fk_cikkek_szerkeszto
+        FOREIGN KEY (szerkesztoid) REFERENCES Szerkesztok(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_cikkek_tema
+        FOREIGN KEY (temaid) REFERENCES Temak(id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
