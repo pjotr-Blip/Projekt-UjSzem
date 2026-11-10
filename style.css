@@ -1,0 +1,44 @@
+body{
+  overflow: hidden;
+    margin: 0;
+}
+
+.slider-container {
+  overflow-wrap: break-word;
+  width: 100%;
+}
+
+.slider-track {
+  display: flex;
+  width: 500px;
+  height: 100vh;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overflow-anchor: none;
+  scrollbar-width: none;
+}
+
+.card {
+  /* Set your card width and spacing here*/
+  width: 380px;
+  height: 450px;
+  margin-bottom: 20px;
+  border: solid black 3px;
+  align-self: center;
+  transition: cubic-bezier(0.075, 0.82, 0.165, 1);
+  transition-duration: 1s;
+}
+
+.card:hover{
+    transform: scale(1.1);
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
