@@ -1,0 +1,64 @@
+CREATE DATABASE IF NOT EXISTS hirportal_db 
+CHARACTER SET utf8mb4 
+COLLATE utf8mb4_unicode_ci;
+
+USE hirportal_db;
+
+-- 1. FELHASZNÁLÓK TÁBLA
+CREATE TABLE felhasznalok (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    felhasznalonev VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    jelszo_hash VARCHAR(255) NOT NULL,
+    szerepkor ENUM('olvaso', 'szerkeszto', 'admin') DEFAULT 'olvaso',
+    bemutatkozas TEXT NULL,
+    profilkep VARCHAR(255) DEFAULT 'alapertelmezett_profilkep.png',
+    regisztralt_ekkor TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. KATEGÓRIÁK TÁBLA
+CREATE TABLE kategoriak (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nev VARCHAR(50) NOT NULL UNIQUE,
+    url_barat_nev VARCHAR(60) NOT NULL UNIQUE -- slug
+);
+
+-- 3. CIKKEK TÁBLA
+CREATE TABLE cikkek (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cim VARCHAR(255) NOT NULL,
+    bevezeto TEXT NOT NULL,
+    tartalom LONGTEXT NOT NULL,
+    boritokep VARCHAR(255) NOT NULL,
+    szerzo_id INT NOT NULL,
+    kategoria_id INT NOT NULL,
+    publikalva_ekkor TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (szerzo_id) REFERENCES felhasznalok(id) ON DELETE CASCADE,
+    FOREIGN KEY (kategoria_id) REFERENCES kategoriak(id) ON DELETE RESTRICT
+);
+
+-- 4. KÖNYVJELEZETT CIKKEK TÁBLA
+CREATE TABLE konyvjelzok (
+    felhasznalo_id INT NOT NULL,
+    cikk_id INT NOT NULL,
+    PRIMARY KEY (felhasznalo_id, cikk_id),
+    FOREIGN KEY (felhasznalo_id) REFERENCES felhasznalok(id) ON DELETE CASCADE,
+    FOREIGN KEY (cikk_id) REFERENCES cikkek(id) ON DELETE CASCADE
+);
+
+-- 5. KÖVETETT SZERKESZTŐK TÁBLA
+CREATE TABLE szerkeszto_kovetesek (
+    koveto_id INT NOT NULL,
+    szerkeszto_id INT NOT NULL,
+    PRIMARY KEY (koveto_id, szerkeszto_id),
+    FOREIGN KEY (koveto_id) REFERENCES felhasznalok(id) ON DELETE CASCADE,
+    FOREIGN KEY (szerkeszto_id) REFERENCES felhasznalok(id) ON DELETE CASCADE
+);
+
+-- 6. AKTUÁLIS PROGRAMOK TÁBLA
+CREATE TABLE programok (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cim VARCHAR(150) NOT NULL,
+    leiras TEXT NOT NULL,
+    program_datum DATETIME NOT NULL
+);
